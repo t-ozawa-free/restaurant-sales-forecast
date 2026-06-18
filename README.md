@@ -4,6 +4,11 @@
 
 ---
 
+## 🌐 デモ
+https://restaurant-sales-forecast.streamlit.app/
+
+---
+
 ## 📊 デモ画像
 ![分析ダッシュボード](docs/images/dashboard.png)
 ![売上予測](docs/images/prediction.png)
