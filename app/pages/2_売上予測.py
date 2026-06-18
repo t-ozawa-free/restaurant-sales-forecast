@@ -1,11 +1,21 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib
 import pickle
 import requests
 import sys
 import os
 from datetime import date
+
+# 日本語フォント設定（japanize_matplotlibの代替）
+try:
+    import japanize_matplotlib
+except ImportError:
+    pass  
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # prefectures.pyのパスを通す
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
@@ -18,9 +28,9 @@ st.markdown("---")
 # モデル読み込み
 @st.cache_resource
 def load_model():
-    with open("../ml/models/sales_model.pkl", "rb") as f:
+    with open(os.path.join(BASE_DIR, "ml", "models", "sales_model.pkl"), "rb") as f:
         model = pickle.load(f)
-    with open("../ml/models/feature_cols.pkl", "rb") as f:
+    with open(os.path.join(BASE_DIR, "ml", "models", "feature_cols.pkl"), "rb") as f:
         feature_cols = pickle.load(f)
     return model, feature_cols
 
@@ -69,7 +79,6 @@ if st.button("1週間の予測を取得", type="primary"):
     lon = PREFECTURES[prefecture]["lon"]
 
     st.info(f"📍 店舗所在地：{prefecture}（天気予報取得先）")
-    # 天気予報APIの呼び出し
     try:
         url = "https://api.open-meteo.com/v1/forecast"
         params = {
@@ -86,7 +95,6 @@ if st.button("1週間の予測を取得", type="primary"):
         response = requests.get(url, params=params, timeout=10)
         data = response.json()["daily"]
 
-        # 予測テーブルの作成
         day_labels = ["月", "火", "水", "木", "金", "土", "日"]
         results = []
 
@@ -107,16 +115,11 @@ if st.button("1週間の予測を取得", type="primary"):
 
         results_df = pd.DataFrame(results)
 
-        # テーブル表示
         st.dataframe(
             results_df.drop(columns=["予測売上（万円）"]),
             width="stretch",
             hide_index=True
         )
-
-        # 棒グラフ表示
-        import matplotlib.pyplot as plt
-        import japanize_matplotlib
 
         fig, ax = plt.subplots(figsize=(10, 4))
         colors = ["coral" if r["曜日"] in ["土", "日"] else "steelblue" for r in results]
@@ -160,7 +163,6 @@ with col3:
 st.markdown("---")
 
 if st.button("予測する", type="primary"):
-
     input_df = make_features(input_date, weather, temperature)
     pred_sales = model.predict(input_df)[0]
 
@@ -186,7 +188,7 @@ st.subheader("📈 今後90日間の売上トレンド（Prophet）")
 
 @st.cache_resource
 def load_prophet_model():
-    with open("../ml/models/prophet_model.pkl", "rb") as f:
+    with open(os.path.join(BASE_DIR, "ml", "models", "prophet_model.pkl"), "rb") as f:
         prophet_model = pickle.load(f)
     return prophet_model
 
@@ -195,10 +197,7 @@ prophet_model = load_prophet_model()
 future = prophet_model.make_future_dataframe(periods=90)
 forecast = prophet_model.predict(future)
 
-import matplotlib.pyplot as plt
-import japanize_matplotlib
-
-sales_df = pd.read_csv("../data/raw/sales.csv")
+sales_df = pd.read_csv(os.path.join(BASE_DIR, "data", "raw", "sales.csv"))
 sales_df["date"] = pd.to_datetime(sales_df["date"])
 daily_df = sales_df.groupby("date")["total"].sum().reset_index()
 
