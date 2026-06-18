@@ -2,10 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import japanize_matplotlib
-import os
-
-# 絶対パスで指定
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 st.set_page_config(page_title="分析ダッシュボード", page_icon="📊", layout="wide")
 st.title("📊 分析ダッシュボード")
@@ -14,9 +10,10 @@ st.markdown("---")
 # データ読み込み
 @st.cache_data
 def load_data():
-    sales_df = pd.read_csv(os.path.join(BASE_DIR, "data", "raw", "sales.csv"))
-    detail_df = pd.read_csv(os.path.join(BASE_DIR, "data", "raw", "sale_details.csv"))
+    sales_df = pd.read_csv("../data/raw/sales.csv")
+    detail_df = pd.read_csv("../data/raw/sale_details.csv")
     sales_df["date"] = pd.to_datetime(sales_df["date"])
+    # 欠損値チェック
     if sales_df.isnull().sum().sum() > 0:
         st.warning("売上データに欠損値が検出されました")
     return sales_df, detail_df
