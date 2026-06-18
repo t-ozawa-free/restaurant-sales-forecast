@@ -37,6 +37,8 @@
 restaurant-sales-forecast/
 ├── data/
 │   └── raw/                  # CSVデータ
+├── docs/
+│   └── images/               # デモ画像
 ├── notebooks/
 │   ├── 01_EDA.ipynb          # 探索的データ分析
 │   ├── 02_model_training.ipynb    # LightGBM学習
@@ -45,9 +47,11 @@ restaurant-sales-forecast/
 │   └── models/               # 学習済みモデル（.pkl）
 ├── app/
 │   ├── Home.py               # トップページ
+│   ├── prefectures.py        # 都道府県情報
 │   └── pages/
 │       ├── 1_分析ダッシュボード.py
 │       └── 2_売上予測.py
+├── requirements.txt
 └── README.md
 ```
 
